@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     ANSWER_CACHE_TTL: int = 3600  # 1 hour
     DATABASE_URL: str = "sqlite:///./answerai.db"
 
+    # Rate limiting
+    PLAYWRIGHT_MIN_NAV_DELAY: float = 3.0  # seconds between page navigations
+
+    # CORS — defaults to local frontend; override in .env for deployed instances.
+    CORS_ORIGINS: str = "http://localhost:3000"
+    FRONTEND_PORT: int = 3000
+
     class Config:
         env_file = ".env"
         extra = "ignore"

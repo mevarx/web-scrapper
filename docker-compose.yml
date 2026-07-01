@@ -9,7 +9,6 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - sqlite_data:/app/data
-      - ./backend:/app
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
@@ -33,7 +32,6 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     volumes:
-      - ./frontend:/app
       - /app/node_modules
       - /app/.next
     environment:

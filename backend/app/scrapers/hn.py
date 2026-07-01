@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timezone
 from typing import List
 from .base import SourceAdapter, RawResult
+from ..rate_limiter import get_limiter, retry_with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,9 @@ HN_ITEM_BASE = "https://hacker-news.firebaseio.com/v0"
 class HackerNewsAdapter(SourceAdapter):
     """Adapter using the Algolia HN Search API for relevance search
     and the official Firebase HN API for item details."""
+
+    def __init__(self):
+        self._limiter = get_limiter("hn")
 
     @property
     def name(self) -> str:
@@ -33,7 +37,12 @@ class HackerNewsAdapter(SourceAdapter):
     async def _fetch_top_comments(self, client: httpx.AsyncClient, story_id: int, limit: int = 3) -> str:
         """Fetch top-level comments from the Firebase HN API for richer context."""
         try:
-            r = await client.get(f"{HN_ITEM_BASE}/item/{story_id}.json", timeout=5)
+            r = await retry_with_backoff(
+                client.get,
+                f"{HN_ITEM_BASE}/item/{story_id}.json",
+                timeout=5,
+                limiter=self._limiter,
+            )
             if r.status_code != 200:
                 return ""
             item = r.json()
@@ -41,7 +50,12 @@ class HackerNewsAdapter(SourceAdapter):
 
             comments = []
             for kid_id in kid_ids:
-                cr = await client.get(f"{HN_ITEM_BASE}/item/{kid_id}.json", timeout=5)
+                cr = await retry_with_backoff(
+                    client.get,
+                    f"{HN_ITEM_BASE}/item/{kid_id}.json",
+                    timeout=5,
+                    limiter=self._limiter,
+                )
                 if cr.status_code == 200:
                     cdata = cr.json()
                     if cdata and cdata.get("type") == "comment" and not cdata.get("deleted"):
@@ -61,7 +75,12 @@ class HackerNewsAdapter(SourceAdapter):
                     "tags": "story",
                     "hitsPerPage": limit,
                 }
-                resp = await client.get(f"{ALGOLIA_HN_BASE}/search", params=params)
+                resp = await retry_with_backoff(
+                    client.get,
+                    f"{ALGOLIA_HN_BASE}/search",
+                    params=params,
+                    limiter=self._limiter,
+                )
                 resp.raise_for_status()
                 hits = resp.json().get("hits", [])
 

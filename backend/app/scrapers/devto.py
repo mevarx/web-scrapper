@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import List
 from .base import SourceAdapter, RawResult
 from ..config import settings
+from ..rate_limiter import get_limiter, retry_with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,9 @@ DEVTO_API_BASE = "https://dev.to/api"
 
 class DevToAdapter(SourceAdapter):
     """Adapter for the public Dev.to REST API."""
+
+    def __init__(self):
+        self._limiter = get_limiter("devto")
 
     @property
     def name(self) -> str:
@@ -40,34 +44,22 @@ class DevToAdapter(SourceAdapter):
                 if settings.DEVTO_API_KEY:
                     headers["api-key"] = settings.DEVTO_API_KEY
 
-                # ── Search articles ───────────────────────────────
-                params = {"per_page": limit}
-                resp = await client.get(
-                    f"{DEVTO_API_BASE}/articles",
-                    params=params,
-                    headers=headers,
-                )
-                resp.raise_for_status()
-
-                # Dev.to /articles doesn't have a direct 'search' param on
-                # the list endpoint. Use the /articles/search endpoint instead
-                # which accepts a `q` query parameter (Forem Search).
-                # Fallback: use /search/feed_content which is more reliable.
-                # However the simplest supported path is:
-                # GET https://dev.to/api/articles?tag=<query>
-                # We'll use the search-specific route.
-
-                search_resp = await client.get(
+                # ── Search articles (tag-based) ──────────────────
+                search_resp = await retry_with_backoff(
+                    client.get,
                     f"{DEVTO_API_BASE}/articles",
                     params={"per_page": limit, "tag": query.replace(" ", "")},
                     headers=headers,
+                    limiter=self._limiter,
                 )
 
                 # Also try the more generic search route
-                generic_resp = await client.get(
+                generic_resp = await retry_with_backoff(
+                    client.get,
                     "https://dev.to/search/feed_content",
                     params={"per_page": limit, "search_fields": query, "class_name": "Article"},
                     headers=headers,
+                    limiter=self._limiter,
                 )
 
                 articles = []
@@ -96,9 +88,11 @@ class DevToAdapter(SourceAdapter):
                     # If we only have description, try fetching the full article
                     if not article.get("body_markdown") and article.get("id"):
                         try:
-                            full_resp = await client.get(
+                            full_resp = await retry_with_backoff(
+                                client.get,
                                 f"{DEVTO_API_BASE}/articles/{article['id']}",
                                 headers=headers,
+                                limiter=self._limiter,
                             )
                             if full_resp.status_code == 200:
                                 full_data = full_resp.json()

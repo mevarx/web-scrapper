@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import List
 from .base import SourceAdapter, RawResult
 from ..config import settings
+from ..rate_limiter import get_limiter
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,9 @@ logger = logging.getLogger(__name__)
 class RedditAdapter(SourceAdapter):
     """Adapter for Reddit using PRAW (Python Reddit API Wrapper).
     Requires client_id + client_secret for a read-only script-type app."""
+
+    def __init__(self):
+        self._limiter = get_limiter("reddit")
 
     @property
     def name(self) -> str:
@@ -88,6 +92,7 @@ class RedditAdapter(SourceAdapter):
                     )
                 return posts
 
+            await self._limiter.acquire()
             results = await loop.run_in_executor(None, _blocking_search)
 
         except Exception as e:

@@ -19,6 +19,8 @@ from .cache import (
 )
 from .ranking import rank_results
 from .rag import RAGPipeline
+from .sanitize import sanitize_error
+from .rate_limiter import get_semaphore, get_all_rate_limit_states
 from .scrapers.base import SourceAdapter, RawResult
 from .scrapers.stackoverflow import StackOverflowAdapter
 from .scrapers.devto import DevToAdapter
@@ -55,7 +57,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -94,30 +96,32 @@ async def _run_scraper(
     query: str,
     db: Session,
 ) -> tuple[str, List[RawResult], Optional[str]]:
-    """Execute one scraper with cache check, timeout, and error isolation.
+    """Execute one scraper with semaphore gate, cache check, timeout, and error isolation.
 
     Returns (source_name, results, error_message_or_None).
     """
-    # Check raw cache first
-    cached = get_raw_cache(db, query, adapter.name)
-    if cached is not None:
-        return (adapter.name, cached, None)
+    semaphore = get_semaphore(adapter.name)
+    async with semaphore:
+        # Check raw cache first
+        cached = get_raw_cache(db, query, adapter.name)
+        if cached is not None:
+            return (adapter.name, cached, None)
 
-    try:
-        results = await asyncio.wait_for(
-            adapter.search(query), timeout=PER_SOURCE_TIMEOUT
-        )
-        if results:
-            set_raw_cache(db, query, adapter.name, results)
-        return (adapter.name, results, None)
-    except asyncio.TimeoutError:
-        msg = f"{adapter.name} timed out after {PER_SOURCE_TIMEOUT}s"
-        logger.warning(msg)
-        return (adapter.name, [], msg)
-    except Exception as e:
-        msg = f"{adapter.name} failed: {str(e)}"
-        logger.error(msg)
-        return (adapter.name, [], msg)
+        try:
+            results = await asyncio.wait_for(
+                adapter.search(query), timeout=PER_SOURCE_TIMEOUT
+            )
+            if results:
+                set_raw_cache(db, query, adapter.name, results)
+            return (adapter.name, results, None)
+        except asyncio.TimeoutError:
+            msg = f"{adapter.name} timed out after {PER_SOURCE_TIMEOUT}s"
+            logger.warning(msg)
+            return (adapter.name, [], msg)
+        except Exception as e:
+            msg = f"{adapter.name} failed: {sanitize_error(str(e))}"
+            logger.error(msg)
+            return (adapter.name, [], msg)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -143,6 +147,12 @@ async def get_status():
             "authenticated": authenticated,
         }
     return report
+
+
+@app.get("/api/rate-limits")
+def get_rate_limits():
+    """Return current rate-limit state for all source limiters."""
+    return get_all_rate_limit_states()
 
 
 @app.post("/api/query")

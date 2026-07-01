@@ -3,8 +3,10 @@ import httpx
 import logging
 from datetime import datetime, timezone
 from typing import List
+from urllib.parse import quote
 from .base import SourceAdapter, RawResult
 from ..config import settings
+from ..rate_limiter import get_limiter, retry_with_backoff
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,9 @@ class TwitterAdapter(SourceAdapter):
     ⚠️  Both paths are fragile — API access tiers frequently change
     and scraping is actively blocked.  Disabled by default.
     """
+
+    def __init__(self):
+        self._limiter = get_limiter("twitter")
 
     @property
     def name(self) -> str:
@@ -40,6 +45,7 @@ class TwitterAdapter(SourceAdapter):
 
     async def _test_api(self) -> bool:
         try:
+            await self._limiter.acquire()
             async with httpx.AsyncClient(timeout=8) as client:
                 headers = {"Authorization": f"Bearer {settings.TWITTER_BEARER_TOKEN}"}
                 r = await client.get(
@@ -89,10 +95,12 @@ class TwitterAdapter(SourceAdapter):
                     "expansions": "author_id",
                     "user.fields": "username",
                 }
-                resp = await client.get(
+                resp = await retry_with_backoff(
+                    client.get,
                     f"{TWITTER_API_BASE}/tweets/search/recent",
                     params=params,
                     headers=headers,
+                    limiter=self._limiter,
                 )
                 resp.raise_for_status()
                 data = resp.json()
@@ -148,7 +156,8 @@ class TwitterAdapter(SourceAdapter):
                 )
                 page = await context.new_page()
 
-                search_url = f"https://x.com/search?q={query}&src=typed_query&f=top"
+                search_url = f"https://x.com/search?q={quote(query)}&src=typed_query&f=top"
+                await self._limiter.acquire()
                 await page.goto(search_url, wait_until="domcontentloaded", timeout=15000)
                 await asyncio.sleep(3)  # Wait for JS rendering
 

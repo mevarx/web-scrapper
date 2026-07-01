@@ -2,8 +2,10 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import List
+from urllib.parse import quote
 from .base import SourceAdapter, RawResult
 from ..config import settings
+from ..rate_limiter import get_limiter
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,9 @@ class MediumAdapter(SourceAdapter):
     discourages scraping.  Selectors may break without notice.
     Disabled by default (ENABLE_MEDIUM_SCRAPING=false).
     """
+
+    def __init__(self):
+        self._limiter = get_limiter("medium")
 
     @property
     def name(self) -> str:
@@ -31,6 +36,7 @@ class MediumAdapter(SourceAdapter):
             async with async_playwright() as pw:
                 browser = await pw.chromium.launch(headless=True)
                 page = await browser.new_page()
+                await self._limiter.acquire()
                 await page.goto("https://medium.com", timeout=10000)
                 title = await page.title()
                 await browser.close()
@@ -56,7 +62,8 @@ class MediumAdapter(SourceAdapter):
                 )
                 page = await context.new_page()
 
-                search_url = f"https://medium.com/search?q={query}"
+                search_url = f"https://medium.com/search?q={quote(query)}"
+                await self._limiter.acquire()
                 await page.goto(search_url, wait_until="domcontentloaded", timeout=15000)
 
                 # Configurable delay to respect rate limits
