@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - sqlite_data:/app/data
+      - ./backend:/app
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+      - REDDIT_USER_AGENT=${REDDIT_USER_AGENT}
+      - DEVTO_API_KEY=${DEVTO_API_KEY}
+      - STACKOVERFLOW_KEY=${STACKOVERFLOW_KEY}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN}
+      - ENABLE_MEDIUM_SCRAPING=${ENABLE_MEDIUM_SCRAPING:-false}
+      - ENABLE_TWITTER_SCRAPING=${ENABLE_TWITTER_SCRAPING:-false}
+      - RAW_CACHE_TTL=${RAW_CACHE_TTL:-21600}
+      - ANSWER_CACHE_TTL=${ANSWER_CACHE_TTL:-3600}
+      - DATABASE_URL=sqlite:////app/data/answerai.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-8000}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:

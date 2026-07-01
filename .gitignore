@@ -1,0 +1,36 @@
+# Local environment variables
+.env
+
+# Python build and cache artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Frontend dependencies and builds
+node_modules/
+.next/
+out/
+.vercel
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database files
+*.db
+*.sqlite3
+
+# Local browser automation binaries/logs (Playwright/Puppeteer)
+.playwright/
+.browser-cache/
+
+# Agent configuration and local state memory
+.agents/
+memory.md
