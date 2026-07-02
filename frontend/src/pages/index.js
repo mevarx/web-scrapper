@@ -2,6 +2,9 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
+import dynamic from 'next/dynamic'
+
+const DarkVeil = dynamic(() => import('../components/DarkVeil'), { ssr: false });
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -239,7 +242,34 @@ export default function Home() {
       </header>
 
       <main style={{ flex: 1, position: 'relative', zIndex: 1 }}>
-        <div className="container" style={{ paddingTop: '1rem', paddingBottom: '5rem' }}>
+        {/* DarkVeil WebGL background — full viewport width, only on landing */}
+        {!hasResult && (
+          <>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', zIndex: 0, overflow: 'hidden' }}>
+              <DarkVeil
+                hueShift={208}
+                noiseIntensity={0.02}
+                speed={0.8}
+                scanlineFrequency={1.4}
+                warpAmount={0.3}
+                resolutionScale={1}
+              />
+            </div>
+            {/* Gradient overlay to keep text legible */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '100%',
+              zIndex: 1,
+              background: 'linear-gradient(to bottom, rgba(5,5,7,0.4) 0%, rgba(5,5,7,0.7) 55%, rgba(5,5,7,1) 100%)',
+              pointerEvents: 'none'
+            }} />
+          </>
+        )}
+
+        <div className="container" style={{ paddingTop: '1rem', paddingBottom: '5rem', position: 'relative', zIndex: 2 }}>
 
           {/* Hero / Search section */}
           <div className={`search-hero ${hasResult ? 'compact' : ''}`}>
