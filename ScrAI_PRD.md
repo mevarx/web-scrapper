@@ -1,6 +1,6 @@
 # PRD: Cited — Self-Hosted Multi-Source Answer Aggregator
 
-**Doc status:** Draft v1.0 (renamed from AnswerAI)
+**Doc status:** Draft v1.0 (renamed to Cited)
 **Owner:** Product/Eng
 **Last updated:** 2026-07-02
 
