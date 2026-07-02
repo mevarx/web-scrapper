@@ -66,7 +66,7 @@ class RAGPipeline:
             )
 
         prompt = (
-            "You are AnswerAI, a developer-focused answer engine.\n\n"
+            "You are Cited, a developer-focused answer engine.\n\n"
             "## Instructions\n"
             "Synthesize a comprehensive, accurate answer to the question below "
             "using ONLY the provided references.\n"

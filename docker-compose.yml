@@ -22,7 +22,7 @@ services:
       - ENABLE_TWITTER_SCRAPING=${ENABLE_TWITTER_SCRAPING:-false}
       - RAW_CACHE_TTL=${RAW_CACHE_TTL:-21600}
       - ANSWER_CACHE_TTL=${ANSWER_CACHE_TTL:-3600}
-      - DATABASE_URL=sqlite:////app/data/answerai.db
+      - DATABASE_URL=sqlite:////app/data/cited.db
     restart: unless-stopped
 
   frontend:

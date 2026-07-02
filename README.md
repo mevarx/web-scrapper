@@ -1,6 +1,6 @@
-# AnswerAI
+# Cited
 
-AnswerAI is a self-hosted, multi-source answer aggregator and search engine designed for developers. It executes search queries across multiple platforms in parallel, ranks the results based on source authority and recency, and feeds the top passages into a RAG (Retrieval-Augmented Generation) pipeline using the Google Gemini API. 
+Cited is a self-hosted, multi-source answer aggregator and search engine designed for developers. It executes search queries across multiple platforms in parallel, ranks the results based on source authority and recency, and feeds the top passages into a RAG (Retrieval-Augmented Generation) pipeline using the Google Gemini API. 
 
 This is a self-hosted project. Users supply their own API keys, keeping search histories and credentials entirely local.
 

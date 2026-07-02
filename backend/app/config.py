@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Optional APIs
     REDDIT_CLIENT_ID: Optional[str] = None
     REDDIT_CLIENT_SECRET: Optional[str] = None
-    REDDIT_USER_AGENT: Optional[str] = "python:answerai:v1.0.0"
+    REDDIT_USER_AGENT: Optional[str] = "python:cited:v1.0.0"
 
     DEVTO_API_KEY: Optional[str] = None
     STACKOVERFLOW_KEY: Optional[str] = None
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     # Cache
     RAW_CACHE_TTL: int = 21600  # 6 hours
     ANSWER_CACHE_TTL: int = 3600  # 1 hour
-    DATABASE_URL: str = "sqlite:///./answerai.db"
+    DATABASE_URL: str = "sqlite:///./cited.db"
 
     # Rate limiting
     PLAYWRIGHT_MIN_NAV_DELAY: float = 3.0  # seconds between page navigations

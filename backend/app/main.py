@@ -45,11 +45,11 @@ async def lifespan(app: FastAPI):
     logger.info("Database tables created / verified.")
     yield
     # Shutdown: nothing special needed for SQLite
-    logger.info("Shutting down AnswerAI backend.")
+    logger.info("Shutting down Cited backend.")
 
 
 app = FastAPI(
-    title="AnswerAI Backend",
+    title="Cited Backend",
     version="1.0.0",
     description="Self-hosted multi-source answer aggregator API",
     lifespan=lifespan,

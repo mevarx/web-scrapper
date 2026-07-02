@@ -25,7 +25,7 @@ class RedditAdapter(SourceAdapter):
         return praw.Reddit(
             client_id=settings.REDDIT_CLIENT_ID,
             client_secret=settings.REDDIT_CLIENT_SECRET,
-            user_agent=settings.REDDIT_USER_AGENT or "python:answerai:v1.0.0",
+            user_agent=settings.REDDIT_USER_AGENT or "python:cited:v1.0.0",
         )
 
     def is_configured(self) -> bool:

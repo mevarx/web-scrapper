@@ -1,4 +1,4 @@
-"""Centralized rate-limiting infrastructure for AnswerAI source adapters.
+"""Centralized rate-limiting infrastructure for Cited source adapters.
 
 Provides:
   - TokenBucketLimiter : asyncio-based token-bucket with configurable rate/burst.
