@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ===========================
    DESIGN TOKENS
@@ -38,7 +38,7 @@
   --transition-normal: 0.3s var(--ease-out);
   --transition-slow: 0.5s var(--ease-out);
 
-  --font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --radius-sm: 6px;
