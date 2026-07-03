@@ -27,9 +27,8 @@ class Settings(BaseSettings):
     # Rate limiting
     PLAYWRIGHT_MIN_NAV_DELAY: float = 3.0  # seconds between page navigations
 
-    # CORS — defaults to local frontend; override in .env for deployed instances.
+    # CORS origins allowed to access the backend API
     CORS_ORIGINS: str = "http://localhost:3000"
-    FRONTEND_PORT: int = 3000
 
     class Config:
         env_file = ".env"
