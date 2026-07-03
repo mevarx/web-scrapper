@@ -29,22 +29,18 @@ from .scrapers.reddit import RedditAdapter
 from .scrapers.medium import MediumAdapter
 from .scrapers.twitter import TwitterAdapter
 
-# ── Logging ───────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger(__name__)
 
-# ── Lifespan ──────────────────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create tables
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created / verified.")
     yield
-    # Shutdown: nothing special needed for SQLite
     logger.info("Shutting down Cited backend.")
 
 
@@ -63,7 +59,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Adapter registry ─────────────────────────────────────────────────
 ALL_ADAPTERS: List[SourceAdapter] = [
     StackOverflowAdapter(),
     DevToAdapter(),
@@ -75,19 +70,17 @@ ALL_ADAPTERS: List[SourceAdapter] = [
 
 rag_pipeline = RAGPipeline()
 
-# ── Request / Response schemas ────────────────────────────────────────
 
 class QueryRequest(BaseModel):
     query: str
-    sources: Optional[List[str]] = None  # None ⇒ all configured sources
+    sources: Optional[List[str]] = None
+
 
 class SettingsUpdate(BaseModel):
     gemini_model: Optional[str] = None
     raw_cache_ttl: Optional[int] = None
     answer_cache_ttl: Optional[int] = None
 
-
-# ── Helper: run a single scraper safely ──────────────────────────────
 
 PER_SOURCE_TIMEOUT = 10.0  # seconds
 
@@ -102,7 +95,6 @@ async def _run_scraper(
     """
     semaphore = get_semaphore(adapter.name)
     async with semaphore:
-        # Check raw cache first
         cached = get_raw_cache(db, query, adapter.name)
         if cached is not None:
             return (adapter.name, cached, None)
@@ -123,10 +115,6 @@ async def _run_scraper(
             logger.error(msg)
             return (adapter.name, [], msg)
 
-
-# ═══════════════════════════════════════════════════════════════════════
-#  ENDPOINTS
-# ═══════════════════════════════════════════════════════════════════════
 
 @app.get("/api/status")
 async def get_status():
@@ -162,7 +150,6 @@ async def execute_query(payload: QueryRequest, db: Session = Depends(get_db)):
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    # Determine which sources to use
     if payload.sources:
         enabled = [s.lower() for s in payload.sources]
     else:
@@ -174,12 +161,10 @@ async def execute_query(payload: QueryRequest, db: Session = Depends(get_db)):
             detail="No sources are configured. Add API keys in .env.",
         )
 
-    # ── Check answer cache ────────────────────────────────────────
     cached_answer = get_answer_cache(db, query, enabled)
     if cached_answer:
         return cached_answer
 
-    # ── Parallel scrape ───────────────────────────────────────────
     active_adapters = [a for a in ALL_ADAPTERS if a.name in enabled]
     tasks = [_run_scraper(a, query, db) for a in active_adapters]
     scrape_results = await asyncio.gather(*tasks)
@@ -201,20 +186,16 @@ async def execute_query(payload: QueryRequest, db: Session = Depends(get_db)):
             "cached": False,
         }
 
-    # ── Rank ──────────────────────────────────────────────────────
     ranked = rank_results(all_results)
-
-    # ── RAG synthesis ─────────────────────────────────────────────
     rag_response = await rag_pipeline.generate_answer(query, ranked)
 
-    # ── Cache the answer ──────────────────────────────────────────
     set_answer_cache(
         db,
         query,
         enabled,
         rag_response["answer"],
         rag_response["citations"],
-        [r for r in ranked[:20]],  # Store top 20 raw results
+        [r for r in ranked[:20]],
     )
 
     return {

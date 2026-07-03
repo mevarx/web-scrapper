@@ -6,7 +6,7 @@ from .scrapers.base import RawResult
 
 logger = logging.getLogger(__name__)
 
-# ── Default source weights (configurable via settings later) ─────────
+# Default source weights
 DEFAULT_WEIGHTS: Dict[str, float] = {
     "stackoverflow": 1.0,
     "devto": 0.85,
@@ -16,9 +16,7 @@ DEFAULT_WEIGHTS: Dict[str, float] = {
     "twitter": 0.40,
 }
 
-# ── Normalization ceilings per source ────────────────────────────────
-# These represent the "high watermark" raw score at which a result
-# is considered maximally engaged for its platform.
+# Normalization ceilings per source
 SCORE_CEILINGS: Dict[str, float] = {
     "stackoverflow": 50.0,
     "reddit": 200.0,

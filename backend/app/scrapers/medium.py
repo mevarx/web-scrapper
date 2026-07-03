@@ -69,7 +69,7 @@ class MediumAdapter(SourceAdapter):
                 # Configurable delay to respect rate limits
                 await asyncio.sleep(2)
 
-                # ── Attempt to parse article cards ────────────────
+                # Attempt to parse article cards
                 # Medium's DOM structure changes frequently;
                 # we use multiple selector strategies with fallbacks.
                 article_links = []

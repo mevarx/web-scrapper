@@ -7,7 +7,7 @@ before they reach the frontend or logs visible to end-users.
 import re
 from typing import Optional
 
-# ── Patterns that look like secrets ──────────────────────────────────
+# Patterns that look like secrets
 _SECRET_PATTERNS = [
     re.compile(r"AIza[0-9A-Za-z\-_]{35}"),           # Google API keys
     re.compile(r"sk-[A-Za-z0-9]{20,}"),               # OpenAI-style keys

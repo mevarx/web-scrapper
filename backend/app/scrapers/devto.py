@@ -44,7 +44,7 @@ class DevToAdapter(SourceAdapter):
                 if settings.DEVTO_API_KEY:
                     headers["api-key"] = settings.DEVTO_API_KEY
 
-                # ── Search articles (tag-based) ──────────────────
+                # Search articles (tag-based)
                 search_resp = await retry_with_backoff(
                     client.get,
                     f"{DEVTO_API_BASE}/articles",

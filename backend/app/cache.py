@@ -24,8 +24,6 @@ def make_query_hash(query: str, sources: Optional[List[str]] = None) -> str:
     return hashlib.md5(key.encode()).hexdigest()
 
 
-# ── Raw cache ────────────────────────────────────────────────────────
-
 def get_raw_cache(db: Session, query: str, source_name: str) -> Optional[List[RawResult]]:
     """Return cached raw results for a single source if still within TTL."""
     q_hash = make_query_hash(query, [source_name])
@@ -66,8 +64,6 @@ def set_raw_cache(
     db.commit()
     logger.info("Raw cache SET for source=%s hash=%s (%d results)", source_name, q_hash, len(results))
 
-
-# ── Answer cache ─────────────────────────────────────────────────────
 
 def get_answer_cache(db: Session, query: str, sources: List[str]) -> Optional[dict]:
     """Return cached synthesized answer if still within TTL."""
@@ -118,8 +114,6 @@ def set_answer_cache(
     db.commit()
     logger.info("Answer cache SET hash=%s", q_hash)
 
-
-# ── Eviction ─────────────────────────────────────────────────────────
 
 def evict_expired(db: Session) -> int:
     """Remove all expired rows from both cache tables. Returns count deleted."""

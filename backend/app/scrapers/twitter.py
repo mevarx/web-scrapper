@@ -72,7 +72,6 @@ class TwitterAdapter(SourceAdapter):
             logger.warning("Twitter Playwright test failed: %s", e)
             return False
 
-    # ── Search Methods ────────────────────────────────────────────────
 
     async def search(self, query: str, limit: int = 5) -> List[RawResult]:
         if not self.is_configured():

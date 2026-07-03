@@ -19,7 +19,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-# ── Rate-limit state snapshot (for status dashboard) ─────────────────
+# Rate-limit state snapshot (for status dashboard)
 
 @dataclass
 class RateLimitState:
@@ -34,7 +34,7 @@ class RateLimitState:
     api_reset_at: Optional[float] = None  # epoch from API response headers
 
 
-# ── Token-bucket limiter ─────────────────────────────────────────────
+# Token-bucket limiter
 
 class TokenBucketLimiter:
     """Async token-bucket rate limiter.
@@ -144,7 +144,7 @@ class TokenBucketLimiter:
         )
 
 
-# ── Retry with exponential backoff + jitter ──────────────────────────
+# Retry with exponential backoff + jitter
 
 MAX_RETRIES = 3
 BASE_DELAY = 1.0
@@ -185,7 +185,7 @@ async def retry_with_backoff(
             if response.status_code not in RETRYABLE_STATUS_CODES:
                 return response
 
-            # ── Retryable status code ────────────────────────────
+            # Retryable status code
             retry_after = response.headers.get("retry-after")
             if retry_after:
                 try:
@@ -243,7 +243,7 @@ async def retry_with_backoff(
     raise RuntimeError("retry_with_backoff: unexpected exit")
 
 
-# ── Stack Exchange-specific: read `backoff` from JSON body ───────────
+# Stack Exchange-specific: read `backoff` from JSON body
 
 async def check_se_backoff(response: httpx.Response) -> None:
     """Stack Exchange API returns a `backoff` field in the JSON body
@@ -260,7 +260,7 @@ async def check_se_backoff(response: httpx.Response) -> None:
         pass  # Non-JSON response or parse error — ignore
 
 
-# ── Global limiter registry ──────────────────────────────────────────
+# Global limiter registry
 
 # Default rate-limit configs per source.
 # rate = tokens/second, burst = max bucket size.

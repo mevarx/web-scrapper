@@ -42,7 +42,7 @@ class StackOverflowAdapter(SourceAdapter):
         results: List[RawResult] = []
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                # ── Step 1: Search for relevant questions ─────────
+                # Search for relevant questions
                 params = {
                     "order": "desc",
                     "sort": "relevance",
@@ -74,7 +74,7 @@ class StackOverflowAdapter(SourceAdapter):
                         q.get("creation_date", 0), tz=timezone.utc
                     )
 
-                    # ── Step 2: Fetch top answers for each question ──
+                    # Fetch top answers for each question
                     body_parts = [unescape(q.get("body", ""))]
                     answer_score = q.get("score", 0)
 

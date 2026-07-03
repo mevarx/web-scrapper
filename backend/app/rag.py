@@ -20,9 +20,6 @@ class RAGPipeline:
             genai.configure(api_key=settings.GEMINI_API_KEY)
         self.model_name = settings.GEMINI_MODEL
 
-    # ── Chunking ──────────────────────────────────────────────────────
-
-    @staticmethod
     def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> List[str]:
         """Split text into overlapping word-level chunks of ~chunk_size words."""
         words = text.split()
@@ -40,14 +37,10 @@ class RAGPipeline:
 
         return chunks
 
-    # ── Context selection ─────────────────────────────────────────────
-
     @staticmethod
     def select_top_k(ranked_results: List[dict], k: int = 8) -> List[dict]:
         """Pick the top-K results for the prompt context window."""
         return ranked_results[:k]
-
-    # ── Prompt construction ───────────────────────────────────────────
 
     @staticmethod
     def build_prompt(query: str, context: List[dict]) -> str:
@@ -85,8 +78,6 @@ class RAGPipeline:
         )
         return prompt
 
-    # ── Citation validation ───────────────────────────────────────────
-
     @staticmethod
     def validate_citations(answer: str, source_count: int) -> tuple[bool, List[int]]:
         """Verify every [n] marker maps to a real reference index.
@@ -113,8 +104,6 @@ class RAGPipeline:
             "## Corrected Answer\n"
         )
 
-    # ── Generation ────────────────────────────────────────────────────
-
     async def generate_answer(
         self, query: str, ranked_results: List[dict]
     ) -> Dict[str, Any]:
@@ -127,7 +116,6 @@ class RAGPipeline:
                 "context_used": 0,
             }
 
-        # Build citations metadata for the UI
         citations = []
         for i, item in enumerate(context, start=1):
             citations.append({
@@ -138,7 +126,6 @@ class RAGPipeline:
                 "score": item.get("final_score", 0),
             })
 
-        # ── Call Gemini ───────────────────────────────────────────────
         prompt = self.build_prompt(query, context)
         try:
             model = genai.GenerativeModel(self.model_name)
@@ -153,7 +140,6 @@ class RAGPipeline:
                 "error": True,
             }
 
-        # ── Validate citations ────────────────────────────────────────
         is_valid, invalid = self.validate_citations(answer_text, len(context))
         if not is_valid:
             logger.warning("Invalid citations detected: %s — attempting correction", invalid)
@@ -173,7 +159,6 @@ class RAGPipeline:
                         "Citation correction failed on second attempt (still invalid: %s). "
                         "Returning best-effort answer.", invalid_2
                     )
-                    # Use corrected anyway — it's likely closer
                     answer_text = corrected
             except Exception as e:
                 logger.error("Correction re-prompt failed: %s", e)

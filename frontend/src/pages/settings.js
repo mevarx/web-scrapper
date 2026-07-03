@@ -205,7 +205,7 @@ export default function Settings() {
                 ))}
               </div>
 
-              {/* ──────── TAB: Sources ──────── */}
+              {/* Sources Tab */}
               {activeTab === 'sources' && (
                 <div className="animate-slide-up">
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
@@ -229,10 +229,10 @@ export default function Settings() {
 
                           <div style={{ paddingTop: '0.25rem', flex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                              <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>
-                                {getSourceDisplayName(sourceName)}
-                              </h3>
-                              <span className={`status-badge ${badge.cls}`}>{badge.text}</span>
+                               <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>
+                                 {getSourceDisplayName(sourceName)}
+                               </h3>
+                               <span className={`status-badge ${badge.cls}`}>{badge.text}</span>
                             </div>
 
                             <div className="rate-limit-table">
@@ -271,7 +271,7 @@ export default function Settings() {
                 </div>
               )}
 
-              {/* ──────── TAB: LLM & Cache ──────── */}
+              {/* LLM & Cache parameters Tab */}
               {activeTab === 'llm' && (
                 <form onSubmit={handleSaveSettings} className="animate-slide-up" style={{ maxWidth: '580px' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '2rem', color: 'var(--text-primary)' }}>
@@ -335,7 +335,7 @@ export default function Settings() {
                 </form>
               )}
 
-              {/* ──────── TAB: Cache ──────── */}
+              {/* Cache maintenance Tab */}
               {activeTab === 'cache' && (
                 <div className="animate-slide-up" style={{ maxWidth: '560px' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>

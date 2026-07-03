@@ -69,7 +69,7 @@ class HackerNewsAdapter(SourceAdapter):
         results: List[RawResult] = []
         try:
             async with httpx.AsyncClient(timeout=12) as client:
-                # ── Algolia relevance search ──────────────────────
+                # Algolia relevance search
                 params = {
                     "query": query,
                     "tags": "story",
