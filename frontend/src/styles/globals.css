@@ -410,7 +410,6 @@ body::before {
   font-size: clamp(4rem, 10vw, 6.5rem);
   font-weight: 700;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--text-primary);
   line-height: 1;
   margin-bottom: 1rem;
