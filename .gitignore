@@ -34,3 +34,6 @@ yarn-error.log*
 # Agent configuration and local state memory
 .agents/
 memory.md
+
+# Separated frontend repository
+frontend/
