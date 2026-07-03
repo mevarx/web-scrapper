@@ -1,26 +1,33 @@
-# Cited
+# Cited (Backend)
 
-Cited is a self-hosted, multi-source answer aggregator and search engine designed for developers. It executes search queries across multiple platforms in parallel, ranks the results based on source authority and recency, and feeds the top passages into a RAG (Retrieval-Augmented Generation) pipeline using the Google Gemini API. 
+Cited is a self-hosted, multi-source answer aggregator and search engine designed for developers. It executes search queries across multiple platforms in parallel, ranks the results based on source authority and recency, and feeds the top passages into a RAG (Retrieval-Augmented Generation) pipeline using the Google Gemini API.
 
-This is a self-hosted project. Users supply their own API keys, keeping search histories and credentials entirely local.
+This repository contains the **Cited Backend** API service. The open-source frontend client will be integrated directly into this repository soon.
+
+---
 
 ## Features
 
 - Parallel scraping across Stack Overflow, Dev.to, Hacker News, Reddit, Medium, and Twitter/X.
-- Real-time quality-based ranking utilizing engagement metrics and exponential age decay.
+- Centralized rate-limiting with exponential backoff, retry jitter, and concurrency semaphores.
 - Local SQLite database cache storing raw scraper outputs and synthesized RAG answers.
+- Real-time quality-based ranking utilizing engagement metrics and exponential age decay.
 - Source status health monitoring for all configured APIs.
 - Dynamic post-generation citation validation to ensure all inline citation markers match valid reference URLs.
-- Docker-orchestrated deployment.
+- Docker-orchestrated backend deployment.
+
+---
 
 ## Architecture
 
-The project is structured into two main services:
+The Cited application is structured into two separate modules:
 
-1. **Backend (FastAPI)**: Coordinates concurrent asynchronous search requests, handles caching, implements the ranking algorithm, and manages communication with the Google Gemini API. Headless Playwright drivers are packaged inside the backend container to scrape JavaScript-heavy targets like Medium.
-2. **Frontend (Next.js)**: Displays a responsive search page, a setup wizard to diagnose API connectivity, a dual-panel RAG result view showing inline citation references, and a configuration control dashboard.
+1. **Backend (FastAPI)** (This repository): Coordinates concurrent asynchronous search requests, handles caching, implements the ranking algorithm, and manages communication with the Google Gemini API. Headless Playwright drivers are packaged inside the backend container to scrape JavaScript-heavy targets like Medium.
+2. **Frontend (Next.js)** (To be integrated soon): Renders a responsive search page, a setup wizard to check API connectivity, a dual-panel RAG result view showing inline citation references, and a configuration control dashboard.
 
-## Getting Started
+---
+
+## Getting Started (Backend)
 
 ### Prerequisites
 
@@ -49,12 +56,13 @@ Ensure you have the following installed on your host machine:
    - `STACKOVERFLOW_KEY`: Optional StackExchange app key.
    - `TWITTER_BEARER_TOKEN`: Twitter API v2 token.
 
-4. Start the services:
+4. Start the backend service:
    ```bash
    docker-compose up --build -d
    ```
+   The backend API will run on `http://localhost:8000`.
 
-5. Open your browser and navigate to `http://localhost:3000` to access the Setup Wizard.
+---
 
 ## Development and Extension
 
@@ -77,6 +85,8 @@ You can run test suites inside the backend container:
 ```bash
 docker-compose exec backend pytest
 ```
+
+---
 
 ## License
 
