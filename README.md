@@ -49,7 +49,7 @@ Ensure you have the following installed on your host machine:
    cp .env.example .env
    ```
 
-3. Open `.env` and fill in your credentials. Only the `GEMINI_API_KEY` is strictly required to start up the RAG pipeline; other credentials can be added to enable optional sources:
+3. Open `.env` and fill in your credentials. Only the `GEMINI_API_KEY` is strictly required to start up the RAG pipeline; other credentials can be added to enable optional sources. For detailed instructions on how to get credentials for each platform, see the [API Keys Guide](API_KEYS.md).
    - `GEMINI_API_KEY`: Your Google AI Studio API key.
    - `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET`: Reddit script-type app credentials.
    - `DEVTO_API_KEY`: Optional key to raise Dev.to rate limits.
